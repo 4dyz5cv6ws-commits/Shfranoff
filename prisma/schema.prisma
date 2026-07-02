@@ -1,0 +1,187 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ---------- Меню ----------
+
+model MenuCategory {
+  id          String     @id @default(cuid())
+  slug        String     @unique
+  title       String
+  description String
+  sortOrder   Int        @default(0)
+  items       MenuItem[]
+}
+
+model MenuItem {
+  id          String       @id @default(cuid())
+  categoryId  String
+  category    MenuCategory @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  name        String
+  description String
+  price       Int // в рублях, без копеек
+  weightGrams Int
+  image       String
+  spiceLevel  Int          @default(0) // 0..3
+  tags        String[]     @default([])
+  allergens   String[]     @default([])
+  isAvailable Boolean      @default(true)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  orderLines  OrderLine[]
+
+  @@index([categoryId])
+}
+
+// ---------- Заказы ----------
+
+enum DeliveryType {
+  DELIVERY
+  PICKUP
+}
+
+enum OrderStatus {
+  NEW
+  CONFIRMED
+  PREPARING
+  DELIVERING
+  COMPLETED
+  CANCELLED
+}
+
+model Order {
+  id           String       @id @default(cuid())
+  publicId     String       @unique // короткий номер, который видит гость
+  status       OrderStatus  @default(NEW)
+  customerName String
+  phone        String
+  deliveryType DeliveryType
+  address      String?
+  comment      String?
+  subtotal     Int
+  deliveryFee  Int
+  total        Int
+  lines        OrderLine[]
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+}
+
+model OrderLine {
+  id         String    @id @default(cuid())
+  orderId    String
+  order      Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  menuItemId String
+  menuItem   MenuItem  @relation(fields: [menuItemId], references: [id], onDelete: Restrict)
+  name       String // снимок названия на момент заказа
+  price      Int // снимок цены на момент заказа
+  quantity   Int
+
+  @@index([orderId])
+}
+
+// ---------- Бронирование столов ----------
+
+enum BookingStatus {
+  CONFIRMED
+  CANCELLED
+}
+
+model Booking {
+  id           String        @id @default(cuid())
+  publicId     String        @unique
+  date         String // YYYY-MM-DD
+  time         String // HH:MM
+  guests       Int
+  customerName String
+  phone        String
+  comment      String?
+  status       BookingStatus @default(CONFIRMED)
+  createdAt    DateTime      @default(now())
+
+  @@index([date, time])
+}
+
+// ---------- Банкетные заявки ----------
+
+enum EventType {
+  BIRTHDAY
+  CORPORATE
+  WEDDING
+  ANNIVERSARY
+  OTHER
+}
+
+enum BudgetRange {
+  UP_50
+  FROM_50_100
+  FROM_100_200
+  FROM_200
+}
+
+enum BanquetStatus {
+  NEW
+  CONTACTED
+  CONFIRMED
+  DECLINED
+}
+
+model BanquetRequest {
+  id           String        @id @default(cuid())
+  publicId     String        @unique
+  eventType    EventType
+  date         String
+  guests       Int
+  budget       BudgetRange?
+  customerName String
+  phone        String
+  email        String?
+  comment      String?
+  status       BanquetStatus @default(NEW)
+  createdAt    DateTime      @default(now())
+}
+
+// ---------- Отзывы ----------
+
+model Review {
+  id        String   @id @default(cuid())
+  author    String
+  rating    Int // 1..5
+  text      String
+  date      String // YYYY-MM-DD
+  source    String
+  createdAt DateTime @default(now())
+}
+
+// ---------- Галерея ----------
+
+enum GalleryCategorySlug {
+  INTERIOR
+  FOOD
+  BANQUET
+  ATMOSPHERE
+}
+
+model GalleryImage {
+  id           String              @id @default(cuid())
+  categorySlug GalleryCategorySlug
+  src          String
+  alt          String
+  orientation  String // 'portrait' | 'landscape'
+  sortOrder    Int                 @default(0)
+}
+
+// ---------- Админ (под модуль Auth) ----------
+
+model AdminUser {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  name         String
+  role         String   @default("admin")
+  createdAt    DateTime @default(now())
+}
