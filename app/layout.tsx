@@ -4,7 +4,7 @@ import { CartDrawer } from '@/features/cart/components/CartDrawer';
 import './globals.css';
 
 const fraunces = Fraunces({
-  subsets: ['latin', 'cyrillic'],
+  subsets: ['latin'],
   variable: '--font-fraunces',
   weight: ['400', '500', '600'],
   display: 'swap'
