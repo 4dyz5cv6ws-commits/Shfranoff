@@ -38,3 +38,4 @@ async function verifyEdge(token: string): Promise<boolean> {
 
 export const config = {
   matcher: ['/admin/:path*', '/api/admin/:path*']
+};
