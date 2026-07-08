@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { Minus, Plus } from 'lucide-react';
@@ -14,6 +15,7 @@ const TAG_STYLES: Record<NonNullable<MenuItem['tags']>[number], string> = {
 };
 
 export function MenuCard({ item }: { item: MenuItem }) {
+  const [imageError, setImageError] = useState(false);
   const quantity = useCartStore(
     (s) => s.items.find((line) => line.id === item.id)?.quantity ?? 0
   );
@@ -29,14 +31,17 @@ export function MenuCard({ item }: { item: MenuItem }) {
       transition={{ duration: 0.35, ease: 'easeOut' }}
       className="group overflow-hidden rounded-2xl border border-line bg-surface"
     >
-      <div className="relative aspect-[4/5] w-full overflow-hidden">
-        <Image
-          src={item.image}
-          alt={item.name}
-          fill
-          sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw"
-          className="object-cover transition-transform duration-700 group-hover:scale-105"
-        />
+      <div className="relative aspect-[4/5] w-full overflow-hidden bg-gradient-to-br from-surface2 to-bg">
+        {!imageError && (
+          <Image
+            src={item.image}
+            alt={item.name}
+            fill
+            sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw"
+            className="object-cover transition-transform duration-700 group-hover:scale-105"
+            onError={() => setImageError(true)}
+          />
+        )}
         {item.tags && item.tags.length > 0 && (
           <div className="absolute left-3 top-3 flex gap-1.5">
             {item.tags.map((tag) => (
