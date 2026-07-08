@@ -40,9 +40,10 @@ export function Hero() {
           transition={{ duration: 0.7, delay: 0.3 }}
           className="max-w-3xl font-display text-4xl leading-[1.05] text-cream sm:text-5xl md:text-6xl"
         >
-          Шафран рождается медленно.
-          <br />
-          Мы готовим так же.
+          Огонь, шафран и характер
+<br />
+Забайкалья — на одной тарелке.
+
         </motion.h1>
 
         <SaffronThreadHero className="mt-7 h-4 w-56 sm:w-72" />
